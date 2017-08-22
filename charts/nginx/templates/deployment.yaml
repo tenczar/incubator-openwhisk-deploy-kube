@@ -8,14 +8,6 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-  annotations:
-    pod.beta.kubernetes.io/init-containers: '[
-        {
-            "name": "init-nginx",
-            "image": "berndtj/init-nginx",
-            "command": ["sh", "-c", "certs.sh {{ .Values.domainName }} && (kubectl create secret tls nginx --cert=certs/cert.pem --key=certs/key.pem || true)"]
-        }
-    ]'
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
@@ -28,10 +20,10 @@ spec:
       volumes:
       - name: nginx-certs
         secret:
-          secretName: nginx
+          secretName: {{ template "fullname" . }}
       - name: nginx-conf
         configMap:
-          name: nginx
+          name: {{ template "fullname" .}}
       - name: logs
         emptyDir: {}
       containers:
